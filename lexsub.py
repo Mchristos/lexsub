@@ -4,9 +4,15 @@ from nltk.corpus import lin_thesaurus as lin
 from nltk.corpus import wordnet as wn
 import numpy as np 
 from numpy.linalg import norm
+from gensim.models import KeyedVectors
+
+def cos(v1, v2):
+    return v1.dot(v2)/(norm(v1)*norm(v2))
+
+WORD2VEC_PATH = "~/GoogleNews-vectors-negative300-SLIM.bin"
 
 class NaiveLin(object):
-    """Naive model that ignores context and gets synonymns from lin thesaurus"""
+    """Gets lexical substitutes ignoring context using the lin thesaurus"""
     def __init__(self, n_synonymns):
         self.n_synonyms = n_synonymns
         self.poses = ['n'] # supported POS values 
@@ -27,6 +33,7 @@ class NaiveLin(object):
             raise ValueError("unsupported POS")
 
 class NaiveWordNet(object):
+    """ Gets lexical substitutes ignoring context using WordNet """
     def __init__(self, n_synonymns):
         self.n_synonymns = n_synonymns
         self.poses = ['n'] # supported POS values 
@@ -43,20 +50,13 @@ class NaiveWordNet(object):
         else:
             raise ValueError("unsupported POS")
 
-
-
-from gensim.models import KeyedVectors
-
-def cos(v1, v2):
-    return v1.dot(v2)/(norm(v1)*norm(v2))
-
 class Word2Vec(object):
-    "Find word substitutions for a word in context using word2vec"
+    "Find word substitutions for a word in context using word2vec skip-gram embedding"
     def __init__(self, n_synonymns):
         self.n_synonymns = n_synonymns
         self.poses = ['n'] # supported POS values 
-        self.model = KeyedVectors.load_word2vec_format("~/GoogleNews-vectors-negative300-SLIM.bin", binary=True)
-        self.candidate_generator = NaiveWordNet(50)
+        self.model = KeyedVectors.load_word2vec_format(WORD2VEC_PATH, binary=True)
+        self.candidate_generator = NaiveLin(50)
 
     def get_substitutability(self, t, s, C):
         """ get substitutability of substitution s for target t in context C
@@ -71,22 +71,21 @@ class Word2Vec(object):
         tscore = cos(tvec, svec)
         # 2. context score: how similar is it to the context words?
         cscores = [cos(svec, self.model.get_vector(c)) for c in C ]
-        print(cscores)
-        cscore = sum(cscores)/len(C)
-        return tscore + cscore  
+        cscore = sum(cscores)
+        return (tscore + cscore)/(len(C)+1)  
 
 
     def lex_sub(self, word, context_words):
         w,_,POS = word.partition('.')
-        # get relevant context words 
-        context_in_model = [word for word in context_words if word in self.model.vocab]
-        context_words = context_in_model
+        # filter context words that exist in the word2vec model
+        context_words = [word for word in context_words if word in self.model.vocab]
         # generate candidate substitutions
         candidates = self.candidate_generator.lex_sub(word)
         if POS in self.poses:
-            cand_scores = [self.get_substitutability(w, c, context_words) for c in candidates if c in self.model.vocab]
-            sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True ) 
-            return [s[0] for s in sorted_candidates]                    
+            cand_scores = [self.get_substitutability(w, s, context_words) if s in self.model.vocab else 0 for s in candidates ]
+            assert(len(cand_scores) == len(candidates))
+            sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True )
+            return [sub for sub, score in sorted_candidates][:self.n_synonymns]
         else:
             raise ValueError("unsupported POS")
 
