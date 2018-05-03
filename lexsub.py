@@ -52,10 +52,13 @@ class NaiveWordNet(object):
 
 class Word2Vec(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
-    def __init__(self, n_synonymns):
+    def __init__(self, n_synonymns, word_vectors = None):
         self.n_synonymns = n_synonymns
         self.poses = ['n'] # supported POS values 
-        self.model = KeyedVectors.load_word2vec_format(WORD2VEC_PATH, binary=True)
+        if word_vectors is None:
+            self.word_vectors = KeyedVectors.load_word2vec_format(WORD2VEC_PATH, binary=True)
+        else:
+            self.word_vectors = word_vectors
         self.candidate_generator = NaiveLin(50)
 
     def get_substitutability(self, t, s, C):
@@ -65,12 +68,12 @@ class Word2Vec(object):
         s = candidate substitution 
         C = list of context words 
         """
-        tvec = self.model.get_vector(t)
-        svec = self.model.get_vector(s)
+        tvec = self.word_vectors.get_vector(t)
+        svec = self.word_vectors.get_vector(s)
         # 1. target score: how similar is it to the target word? 
         tscore = cos(tvec, svec)
         # 2. context score: how similar is it to the context words?
-        cscores = [cos(svec, self.model.get_vector(c)) for c in C ]
+        cscores = [cos(svec, self.word_vectors.get_vector(c)) for c in C ]
         cscore = sum(cscores)
         return (tscore + cscore)/(len(C)+1)  
 
@@ -78,11 +81,11 @@ class Word2Vec(object):
     def lex_sub(self, word, context_words):
         w,_,POS = word.partition('.')
         # filter context words that exist in the word2vec model
-        context_words = [word for word in context_words if word in self.model.vocab]
+        context_words = [word for word in context_words if word in self.word_vectors.vocab]
         # generate candidate substitutions
         candidates = self.candidate_generator.lex_sub(word)
         if POS in self.poses:
-            cand_scores = [self.get_substitutability(w, s, context_words) if s in self.model.vocab else 0 for s in candidates ]
+            cand_scores = [self.get_substitutability(w, s, context_words) if s in self.word_vectors.vocab else 0 for s in candidates ]
             assert(len(cand_scores) == len(candidates))
             sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True )
             return [sub for sub, score in sorted_candidates][:self.n_synonymns]
