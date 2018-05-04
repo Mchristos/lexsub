@@ -50,7 +50,7 @@ class NaiveWordNet(object):
 
 class Word2Vec(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
-    def __init__(self, n_substitutes, word_vectors = None, candidate_generator = 'word2vec'):
+    def __init__(self, n_substitutes, word_vectors = None, candidate_generator = 'word2vec', n_candidates = 50):
         """
         n_substitutes = number of lexical substitutes to generate 
         candidate_generator = word2vec, lin, wordnet
@@ -59,7 +59,7 @@ class Word2Vec(object):
         # supported POS values 
         self.poses = ['n', 'a', 'r', 'n.v', 'v', 'n.a'] # ['n'] 
         # number of generated candidates for substitution
-        self.n_candidates = 20 
+        self.n_candidates = n_candidates
         if word_vectors is None:
             self.word_vectors = KeyedVectors.load_word2vec_format(WORD2VEC_PATH, binary=True)
         else:
@@ -107,9 +107,12 @@ class Word2Vec(object):
         context_words = [word for word in context_words if word in self.word_vectors.vocab]
         # generate candidate substitutions
         candidates = self.get_candidates(w, POS)
+        # remove duplicates
+        candidates = list(set(candidates))
         if POS in self.poses:
             cand_scores = [self.get_substitutability(w, s, context_words) if s in self.word_vectors.vocab else 0 for s in candidates ]
             assert(len(cand_scores) == len(candidates))
+            
             sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True )
             return [sub for sub, score in sorted_candidates][:self.n_substitutes]
         else:
