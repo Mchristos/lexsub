@@ -8,9 +8,6 @@ from gensim.models import KeyedVectors
 import tools
 from tools import process_candidates
 
-def cos(v1, v2):
-    return v1.dot(v2)/(norm(v1)*norm(v2))
-
 WORD2VEC_PATH = "~/GoogleNews-vectors-negative300-SLIM.bin"
 
 def lin_synonyms(word, pos):
@@ -70,14 +67,12 @@ class Word2Vec(object):
         s = candidate substitution 
         C = list of context words 
         """
-        tvec = self.word_vectors.get_vector(t)
-        svec = self.word_vectors.get_vector(s)
-        # 1. target score: how similar is it to the target word? 
-        tscore = cos(tvec, svec)
+        # 1. target score: how similar is it to the target word?
+        tscore = self.word_vectors.similarity(t, s)
         # 2. context score: how similar is it to the context words?
-        cscores = [cos(svec, self.word_vectors.get_vector(c)) for c in C ]
+        cscores = [self.word_vectors.similarity(s, c) for c in C ]
         cscore = sum(cscores)
-        return (tscore + cscore)/(len(C)+1)  
+        return (tscore + cscore)/(len(C)+1)
 
 
     def lex_sub(self, word_POS, context_words):
