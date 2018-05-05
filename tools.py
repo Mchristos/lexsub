@@ -52,7 +52,6 @@ def process_candidates(candidates, target):
                   map(lambda s : s.lower().replace('_', ' '), candidates)))
 
 
-
 # test functions
 # print(process_candidates("i am AM a lazy dog dog dog and DOG I am NOT lazy MUCH any_more but candy_coated".split(' '), "lazy"))
 # print(get_words("heloo   and then i came down, with the crown \n and Up. again"))

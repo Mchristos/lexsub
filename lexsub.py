@@ -5,6 +5,7 @@ from nltk.corpus import wordnet as wn
 import numpy as np 
 from numpy.linalg import norm
 from gensim.models import KeyedVectors
+import tools
 from tools import process_candidates
 
 def cos(v1, v2):
@@ -91,8 +92,10 @@ class Word2Vec(object):
         if context_words is None:
             return candidates[:self.n_substitutes]
         else:
-            # filter context words that exist in the word2vec model
-            context_words = [word for word in context_words if word in self.word_vectors.vocab]
+            # filter context words: exist in the word2vec vocab, not stop words  
+            context_words = list(filter(lambda c : c in self.word_vectors.vocab 
+                                               and c not in tools.stopwords, 
+                                               context_words))
             cand_scores = [self.get_substitutability(w, s, context_words) if s in self.word_vectors.vocab else 0 for s in candidates ]
             assert(len(cand_scores) == len(candidates))            
             sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True )
