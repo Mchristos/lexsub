@@ -5,48 +5,28 @@ from nltk.corpus import wordnet as wn
 import numpy as np 
 from numpy.linalg import norm
 from gensim.models import KeyedVectors
+from tools import process_candidates
 
 def cos(v1, v2):
     return v1.dot(v2)/(norm(v1)*norm(v2))
 
 WORD2VEC_PATH = "~/GoogleNews-vectors-negative300-SLIM.bin"
 
-class NaiveLin(object):
-    """Gets lexical substitutes ignoring context using the lin thesaurus"""
-    def __init__(self, n_synonymns):
-        self.n_synonyms = n_synonymns
-        self.poses = ['n', 'a', 'r', 'n.v', 'v', 'n.a'] # ['n'] # supported POS values 
-    
-    def lex_sub(self, w, POS):
-        """
-        word = string in form word.POS 
-        context = XML node of parsed sentence  
-        """
-        if POS in self.poses:
-            fileid = 'sim%s.lsp' % POS.upper()
-            thes_entry = lin.scored_synonyms(w, fileid = fileid)
-            thes_entry = sorted(thes_entry, key = (lambda x : x[1]), reverse = True)
-            thes_entry = thes_entry[:self.n_synonyms]
-            return [word for (word,score) in thes_entry]
-        else:
-            raise ValueError("unsupported POS: %r" % POS)
+def lin_synonyms(word, pos):
+    fileid = 'sim%s.lsp' % pos.upper()
+    thes_entry = lin.scored_synonyms(word, fileid = fileid)
+    thes_entry = sorted(thes_entry, key = (lambda x : x[1]), reverse = True)
+    # return words ordered by score
+    return [syn for syn,score in thes_entry]
 
-class NaiveWordNet(object):
-    """ Gets lexical substitutes ignoring context using WordNet """
-    def __init__(self, n_synonymns):
-        self.n_synonymns = n_synonymns
-        self.poses = ['n'] # supported POS values 
+def wordnet_synonyms(word, pos):
+    if (pos == 'n'):
+        synset = wn.synsets(word, wn.NOUN)
+        # return synonym lemmas in no particular order 
+        return [lemma.name() for s in synset for lemma in s.lemmas()]
+    else:
+        raise ValueError("unsupported part of speech: %r" % pos)
 
-    def lex_sub(self, word, POS):
-        """
-        """
-        if POS in self.poses:
-            synset = wn.synsets(word, wn.NOUN) # NOUN hard-coded 
-            # synset = synset[:self.n_synonymns]
-            result =  [lemma.name() for s in synset for lemma in s.lemmas()]
-            return result[:self.n_synonymns]
-        else:
-            raise ValueError("unsupported POS")
 
 class Word2Vec(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
@@ -71,12 +51,15 @@ class Word2Vec(object):
 
     def get_candidates(self, word, POS):
         if self.candidate_generator == 'word2vec':
-            words_scores = self.word_vectors.most_similar(positive=[word])[:self.n_candidates]
+            words_scores = self.word_vectors.most_similar(positive=[word])
             result = [word for word, score in words_scores]
         if self.candidate_generator == 'lin':
-            result = NaiveLin(self.n_candidates).lex_sub(word, POS)
+            result = lin_synonyms(word, POS)
         if self.candidate_generator == 'wordnet':
-            result = NaiveWordNet(self.n_candidates).lex_sub(word, POS)
+            result = wordnet_synonyms(word, POS)
+        # words to lower case, replace underscore, remove duplicates, 
+        # remove target word and stop words, clip length
+        result = process_candidates(result, word)[:self.n_candidates]
         assert(len(result) <= self.n_candidates)
         return result
 
@@ -103,19 +86,17 @@ class Word2Vec(object):
         context_words = list of words in context 
         """
         w,_,POS = word_POS.partition('.')
-        # filter context words that exist in the word2vec model
-        context_words = [word for word in context_words if word in self.word_vectors.vocab]
         # generate candidate substitutions
         candidates = self.get_candidates(w, POS)
-        # remove duplicates
-        candidates = list(set(candidates))
-        if POS in self.poses:
+        if context_words is None:
+            return candidates[:self.n_substitutes]
+        else:
+            # filter context words that exist in the word2vec model
+            context_words = [word for word in context_words if word in self.word_vectors.vocab]
             cand_scores = [self.get_substitutability(w, s, context_words) if s in self.word_vectors.vocab else 0 for s in candidates ]
-            assert(len(cand_scores) == len(candidates))
-            
+            assert(len(cand_scores) == len(candidates))            
             sorted_candidates = sorted(zip(candidates, cand_scores), key = lambda x : x[1], reverse=True )
             return [sub for sub, score in sorted_candidates][:self.n_substitutes]
-        else:
-            raise ValueError("unsupported POS")
+
 
 
