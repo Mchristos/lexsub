@@ -28,7 +28,8 @@ def wordnet_synonyms(word, pos):
 
 class Word2Vec(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
-    def __init__(self, n_substitutes, word_vectors = None, candidate_generator = 'word2vec', n_candidates = 50):
+    def __init__(self, n_substitutes, word_vectors = None, 
+                       candidate_generator = 'word2vec', n_candidates = 50):
         """
         n_substitutes = number of lexical substitutes to generate 
         candidate_generator = word2vec, lin, wordnet
@@ -73,7 +74,6 @@ class Word2Vec(object):
         cscores = [self.word_vectors.similarity(s, c) for c in C ]
         cscore = sum(cscores)
         return (tscore + cscore)/(len(C)+1)
-
 
     def lex_sub(self, word_POS, context_words):
         """ Get appropriate substitution for a word given context words 

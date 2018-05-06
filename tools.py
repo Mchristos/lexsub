@@ -20,7 +20,7 @@ stopwords = ["it's", "she's", 'were', 'because', 'this', 'couldn', 'then', 'how'
  'myself', 'mustn', 'is', 'been', 'just', 'any', 'out', 'that', 'm', 'such', 
  'me', 'same', 'hers', 'some', 'had', 'does', 'against', 'should', "you've", 
  "doesn't", "you're", 'them', 'am', 'if', 'who', 'few', 'what', 'there', 
- "don't", "weren't", "won't", 'an', 'all', 're', 'it', 'up', "hadn't"]
+ "don't", "weren't", "won't", 'an', 'all', 're', 'it', 'up', "hadn't", "'ll"]
 
 def get_words(s):
     """ Extract a list of words from a sentence string with punctuation, spaces etc 
