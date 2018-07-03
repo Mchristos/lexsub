@@ -28,7 +28,7 @@ def wordnet_synonyms(word, pos):
 
 class LexSub(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
-    def __init__(self, n_substitutes, word_vectors = None, 
+    def __init__(self, word_vectors = None, n_substitutes = 5,
                        candidate_generator = 'word2vec', n_candidates = 50):
         """
         n_substitutes = number of lexical substitutes to generate 
