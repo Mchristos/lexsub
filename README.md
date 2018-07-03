@@ -9,7 +9,7 @@ This repository uses a Word2Vec embedding based on the Google News corpus, made 
 ## Setup 
 
 1. Download the Google News word vectors [from here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and [make sure you have the gensim package installed](https://radimrehurek.com/gensim/install.html). 
-2. Make sure you've [installed nltk (natural language toolkit)](http://www.nltk.org/install.html) and have downloaded the lin thesaurus and wordnet corpora by executing the following in the python console: `import nltk`, `nltk.download('lin_thesaurus')`, `nltk.download('wordnet')
+2. Make sure you've [installed nltk (natural language toolkit)](http://www.nltk.org/install.html) and have downloaded the lin thesaurus and wordnet corpora by executing the following in the python console: `import nltk`, `nltk.download('lin_thesaurus')`, `nltk.download('wordnet')`
 
 ## Example Usage 
 
