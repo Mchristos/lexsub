@@ -4,14 +4,19 @@ Disambiguating between the possible senses of a word in the context of a sentenc
 
 <img src="https://user-images.githubusercontent.com/13951953/42229197-cf3c05f8-7edd-11e8-804c-052b3525e32f.png" alt="drawing" width="400px"/>
 
-This repository uses a Word2Vec embedding based on the google news corpus, made available [here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and through the [gensim library](https://radimrehurek.com/gensim/) to rank candidate word substitutions by their suitability to the context of the sentence.  
+This repository uses a Word2Vec embedding based on the Google News corpus, made available [here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and through the [gensim library](https://radimrehurek.com/gensim/) to rank candidate word substitutions by their suitability to the context of the sentence.  
+
+## Setup 
+
+1. Download the Google News word vectors [from here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and [make sure you have the gensim package installed](https://radimrehurek.com/gensim/install.html). 
+2. Make sure you've [installed nltk (natural language toolkit)](http://www.nltk.org/install.html) and have downloaded the lin thesaurus and wordnet corpora by executing the following in the python console: `import nltk`, `nltk.download('lin_thesaurus')`, `nltk.download('wordnet')
 
 ## Example Usage 
 
     from lexsub import LexSub
     from gensim.models import KeyedVectors
     
-    word2vec_path = "~/GoogleNews-vectors-negative300-SLIM.bin"
+    word2vec_path = "~/GoogleNews-vectors-negative300.bin"
     vectors = KeyedVectors.load_word2vec_format(word2vec_path, binary=True)
     ls = LexSub(vectors, candidate_generator='lin')
 
