@@ -2,6 +2,8 @@
 
 Disambiguating between the possible senses of a word in the context of a sentence is a fundamental problem in NLP. However, this assumes a universal set of "meanings" to disambiguate between. A more natural but also more practical task is finding a good substitution for a word in context. For example, in the sentence "She went to the bar last night", we know bar means pub, but the word bar has other meanings: a chocolate bar, or a ban/restriction on something. 
 
+<img src="https://user-images.githubusercontent.com/13951953/42229197-cf3c05f8-7edd-11e8-804c-052b3525e32f.png" alt="drawing" width="400px"/>
+
 This repository uses a Word2Vec embedding based on the google news corpus, made available [here](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and through the [gensim library](https://radimrehurek.com/gensim/) to rank candidate word substitutions by their suitability to the context of the sentence.  
 
 ## Example Usage 
