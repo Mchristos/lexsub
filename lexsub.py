@@ -75,7 +75,7 @@ class LexSub(object):
         cscore = sum(cscores)
         return (tscore + cscore)/(len(C)+1)
 
-    def lex_sub(self, word_POS, context_words):
+    def lex_sub(self, word_POS, sentence):
         """ Get appropriate substitution for a word given context words 
         
         word_POS = word with part of speech in form word.POS e.g. dog.n
@@ -84,9 +84,10 @@ class LexSub(object):
         w,_,POS = word_POS.partition('.')
         # generate candidate substitutions
         candidates = self.get_candidates(w, POS)
-        if context_words is None:
+        if sentence is None:
             return candidates[:self.n_substitutes]
         else:
+            context_words = tools.get_words(sentence)
             # filter context words: exist in the word2vec vocab, not stop words  
             context_words = list(filter(lambda c : c in self.word_vectors.vocab 
                                                and c not in tools.stopwords, 
