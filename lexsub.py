@@ -26,7 +26,7 @@ def wordnet_synonyms(word, pos):
         raise ValueError("unsupported part of speech: %r" % pos)
 
 
-class Word2Vec(object):
+class LexSub(object):
     "Find word substitutions for a word in context using word2vec skip-gram embedding"
     def __init__(self, n_substitutes, word_vectors = None, 
                        candidate_generator = 'word2vec', n_candidates = 50):
