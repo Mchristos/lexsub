@@ -3,12 +3,12 @@
 from lexsub import LexSub
 from gensim.models import KeyedVectors
 
-word2vec_path = "~/GoogleNews-vectors-negative300.bin"
+word2vec_path = "~/GoogleNews-vectors-negative300-SLIM.bin"
 vectors = KeyedVectors.load_word2vec_format(word2vec_path, binary=True)
 ls = LexSub(vectors, candidate_generator='lin')
 
-sentence = "She had a drink at the pub"
-target = "pub.n"
+sentence = "She had a drink at the bar"
+target = "bar.n"
 result = ls.lex_sub(target, sentence)
 print(result)
-# ['tavern', 'bar', 'cafe', 'restaurant', 'nightclub']
+# ['bars', 'pub', 'tavern', 'nightclub', 'restaurant']
