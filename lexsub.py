@@ -36,7 +36,7 @@ class LexSub(object):
         """
         self.n_substitutes = n_substitutes
         # supported POS values 
-        self.poses = ['n', 'a', 'r', 'n.v', 'v', 'n.a'] # ['n'] 
+        self.poses = ['n', 'a', 'v']
         # number of generated candidates for substitution
         self.n_candidates = n_candidates
         if word_vectors is None:
