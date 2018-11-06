@@ -16,7 +16,7 @@ This repository uses a Word2Vec embedding based on the Google News corpus, made 
     from lexsub import LexSub
     from gensim.models import KeyedVectors
     
-    word2vec_path = "~/GoogleNews-vectors-negative300.bin"
+    word2vec_path = "/path/to/GoogleNews-vectors-negative300.bin"
     vectors = KeyedVectors.load_word2vec_format(word2vec_path, binary=True)
     ls = LexSub(vectors, candidate_generator='lin')
 
